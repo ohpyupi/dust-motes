@@ -1,5 +1,13 @@
-(function (dust) {
-
+(function(root, factory) {
+  if (typeof define === "function" && define.amd && define.amd.dust === true) {
+    define(["dust.core"], factory);
+  } else if (typeof module === "object") {
+    module.exports = factory(require("dustjs-linkedin"));
+    module.exports.registerWith = factory;
+  } else {
+    factory(root.dust);
+  }
+})(this, function(dust) {
   /**
    * iterate helper, loops over given object.
    * Inspired: https://github.com/akdubya/dustjs/issues/9
@@ -16,7 +24,7 @@
    *  if not found, result is undefined (actually sorts ascending
    *  but you should not depend on it)
    */
-  dust.helpers.iterate = function (chunk, context, bodies, params) {
+  dust.helpers.iterate = function(chunk, context, bodies, params) {
     var body = bodies.block,
       sort,
       arr,
@@ -37,18 +45,21 @@
     }
 
     function processBody(key, value) {
-      return body(chunk, context.push({
-        $key: key,
-        $value: value,
-        $type: typeof value
-      }));
+      return body(
+        chunk,
+        context.push({
+          $key: key,
+          $value: value,
+          $type: typeof value
+        })
+      );
     }
 
     if (params.key) {
       obj = dust.helpers.tap(params.key, chunk, context);
 
       if (body) {
-        if ( !! params.sort) {
+        if (!!params.sort) {
           sort = dust.helpers.tap(params.sort, chunk, context);
           arr = [];
           for (k in obj) {
@@ -57,7 +68,7 @@
             }
           }
           compareFn = context.global[sort];
-          if (!compareFn && sort === 'desc') {
+          if (!compareFn && sort === "desc") {
             compareFn = desc;
           }
           if (compareFn) {
@@ -76,12 +87,12 @@
           }
         }
       } else {
-        _console.log('Missing body block in the iter helper.');
+        console.log("Missing body block in the iter helper.");
       }
     } else {
-      _console.log('Missing parameter \'key\' in the iter helper.');
+      console.log("Missing parameter 'key' in the iter helper.");
     }
     return chunk;
-
   };
-})(typeof exports !== 'undefined' ? module.exports = require('dustjs-linkedin') : dust);
+  return dust;
+});
